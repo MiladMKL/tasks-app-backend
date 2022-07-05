@@ -1,63 +1,107 @@
-const express = require('express');
-const app = express();
+const express = require('express')
+const app = express()
+const cors = require('cors')
+require('dotenv').config()
+const Task = require('./models/task')
+
+const requestLogger = (request, response, next) => {
+  console.log('Method:', request.method)
+  console.log('Path:  ', request.path)
+  console.log('Body:  ', request.body)
+  console.log('---')
+  next()
+}
 
 app.use(express.json())
 
-const cors = require('cors')
+app.use(requestLogger)
+
 app.use(cors())
 
+app.use(express.static('build'))
 
-let tasks = [
-  {
-    id: 1,
-    title: "HTML is easy",
-    date: "2022-05-30T17:30:31.098Z",
-    completed: false
-  },
-  {
-    id: 2,
-    title: "CSS is easy",
-    date: "2022-05-30T18:39:34.091Z",
-    completed: false
-  },
-  {
-    id: 3,
-    title: "Javascript is difficult",
-    date: "2022-05-30T19:20:14.298Z",
-    completed: false
-  },
-]
 
 app.get('/', (request, response) => {
-  response.send('<h1>Hello there user!</h1>')
+  response.send('<h1>Hello World!</h1>')
 })
 
 app.get('/api/tasks', (request, response) => {
-  response.json(tasks)
+  Task.find({}).then(tasks => {
+    response.json(tasks)
+  })
 })
 
-app.get('/api/tasks/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const task = tasks.find(task => task.id === id)
-
-  if (task) {
-    response.json(task)
-  } else {
-    response.status(404).end()
-  }
+app.get('/api/tasks/:id', (request, response, next) => {
+  Task.findById(request.params.id)
+    .then(task => {
+      if (task) {
+        response.json(task)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/tasks/:id', (request, response) => {
-  const id = Number(request.params.id)
-  tasks = tasks.filter(task => task.id !== id) // Überschreibe tasks mit einer neuen Liste
-  response.status(204).end()
+  Task.findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 app.post('/api/tasks', (request, response) => {
-  const task = request.body
-  console.log(task)
-  response.json(task)
+  const body = request.body
+
+  if (body.title === undefined) {
+    return response.status(400).json({ error: 'title is required' })
+  }
+
+  const task = new Task({
+    title: body.title,
+    date: new Date(),
+    completed: body.completed || false
+  })
+
+  task.save().then(savedTask => {
+    response.json(savedTask)
+  })
 })
+
+app.put('/api/tasks/:id', (request, response) => {
+  const body = request.body
+
+  const task = {
+    title: body.title,
+    completed: body.completed
+  }
+
+  Task.findByIdAndUpdate(request.params.id, task, { new: true })
+    .then(updatedTask => {
+      response.json(updatedTask)
+    })
+    .catch(error => next(error))
+})
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
+
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {

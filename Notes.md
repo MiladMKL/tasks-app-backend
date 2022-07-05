@@ -10,3 +10,9 @@ npm install cors
 $ git add .
 $ git commit -am "make it better"
 $ git push heroku master
+
+
+Mongoose library for working with MongoDB:
+npm install mongoose
+
+npm install dotenv
