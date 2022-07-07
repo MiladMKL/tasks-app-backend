@@ -11,7 +11,7 @@ tasksRouter.get('/', async (request, response) => {
 tasksRouter.get('/:id', async (request, response) => {
   const task = await Task.findById(request.params.id)
   if (task) {
-    response.json(task)
+    response.json(task.toJSON())
   } else {
     response.status(404).end()
   }

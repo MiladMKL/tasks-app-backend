@@ -46,3 +46,7 @@ npm install --save-dev supertest
 ## To avoid catch for async
 
 npm install express-async-errors
+
+## bcrypt for passwords
+
+npm install bcrypt
