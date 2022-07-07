@@ -32,3 +32,17 @@ npm install dotenv
 
 npm install eslint --save-dev
 npx eslint --init
+
+---
+
+## Jest for testing node
+
+npm install --save-dev jest
+
+## Supertest for testing API
+
+npm install --save-dev supertest
+
+## To avoid catch for async
+
+npm install express-async-errors
