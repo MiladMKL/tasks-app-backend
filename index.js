@@ -12,6 +12,8 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
+/*
+---------------------------- Middleware */
 app.use(express.json())
 
 app.use(requestLogger)
@@ -20,7 +22,8 @@ app.use(cors())
 
 app.use(express.static('build'))
 
-
+/*
+---------------------------- Routers */
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
@@ -43,9 +46,9 @@ app.get('/api/tasks/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-app.delete('/api/tasks/:id', (request, response) => {
+app.delete('/api/tasks/:id', (request, response, next) => {
   Task.findByIdAndRemove(request.params.id)
-    .then(result => {
+    .then(() => {
       response.status(204).end()
     })
     .catch(error => next(error))
@@ -69,7 +72,7 @@ app.post('/api/tasks', (request, response) => {
   })
 })
 
-app.put('/api/tasks/:id', (request, response) => {
+app.put('/api/tasks/:id', (request, response, next) => {
   const body = request.body
 
   const task = {
@@ -84,6 +87,8 @@ app.put('/api/tasks/:id', (request, response) => {
     .catch(error => next(error))
 })
 
+/*
+---------------------------- Error Handlers */
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
@@ -103,6 +108,8 @@ const errorHandler = (error, request, response, next) => {
 app.use(errorHandler)
 
 
+/*
+---------------------------- Port */
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
