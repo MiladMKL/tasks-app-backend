@@ -4,7 +4,7 @@ const config = require('./utils/config')
 const logger = require('./utils/logger')
 
 /*
----------------------------- Create server */
+---------------------------- Create server  */
 const server = http.createServer(app)
 
 server.listen(config.PORT, () => {
