@@ -50,3 +50,7 @@ npm install express-async-errors
 ## bcrypt for passwords
 
 npm install bcrypt
+
+## To generate Webtokens
+
+npm install jsonwebtoken

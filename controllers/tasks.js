@@ -1,15 +1,31 @@
 const tasksRouter = require('express').Router()
+const jwt = require('jsonwebtoken')
+
 const Task = require('../models/task')
+const User = require('../models/user')
+
 
 /** This file handles routing */
 
+const getTokenFrom = request => {
+  const authorizationHeader = request.get('Authorization')
+  if (authorizationHeader && authorizationHeader.toLowerCase().startsWith('bearer ')) {
+    return authorizationHeader.substring(7)
+  }
+  return null
+}
+
 tasksRouter.get('/', async (request, response) => {
-  const tasks = await Task.find({})
+  const tasks = await Task
+    .find({})
+    .populate('user', { username: 1, name: 1 })
+  
   response.json(tasks)
 })
 
 tasksRouter.get('/:id', async (request, response) => {
   const task = await Task.findById(request.params.id)
+  
   if (task) {
     response.json(task.toJSON())
   } else {
@@ -18,21 +34,27 @@ tasksRouter.get('/:id', async (request, response) => {
 })
 
 tasksRouter.post('/', async (request, response) => {
-  const body = request.body
-
-  /*
-  if (body.title === undefined) {
-    return response.status(400).json({ error: 'title is required' })
+  const { title, completed } = request.body
+  
+  const token = getTokenFrom(request)
+  const decodedToken = jwt.verify(token, process.env.SECRET)
+  
+  if (!token || !decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' })
   }
-  */
+  const user = await User.findById(decodedToken.id)
 
   const newTask = new Task({
-    title: body.title,
+    title,
+    completed,
     date: new Date(),
-    completed: body.completed || false
+    user: user._id
   })
 
   const savedTask = await newTask.save()
+  user.tasks = user.tasks.concat(savedTask._id)
+  await user.save()
+
   response.status(201).json(savedTask)
 })
 

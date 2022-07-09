@@ -7,6 +7,7 @@ require('express-async-errors')
 
 const tasksRouter = require('./controllers/tasks')
 const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
 const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
 
@@ -23,15 +24,8 @@ mongoose.connect(config.MONGODB_URI)
     logger.error('error connection to MongoDB:', error.message)
   })
 
-
 /*
 ---------------------------- Generic Middlewares */
-
-/*
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('build'))
-}
-*/
 
 // app.use(express.static('build'))
 app.use(cors())
@@ -41,10 +35,15 @@ app.use(middleware.requestLogger)
 
 /*
 ---------------------------- Router Middleware */
+
+app.use('/api/login', loginRouter)
 app.use('/api/tasks', tasksRouter)
 app.use('/api/users', usersRouter)
+
+
 /*
 ---------------------------- Error Middlewares */
+
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 

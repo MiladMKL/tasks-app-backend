@@ -1,5 +1,6 @@
 POST http://localhost:3001/api/tasks
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOiI2MmM3MWMxZmExYzAwODBhNDRjNDkyMGYiLCJpYXQiOjE2NTczOTcxNjh9.UKzvQJSRv1-CXuJyL-Mp-F8qS51E3zSkuUnX2aR6cJQ
 
 {
   "title": "Buy milk",
