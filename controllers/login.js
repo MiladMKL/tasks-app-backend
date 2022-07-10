@@ -6,6 +6,10 @@ const User = require('../models/user')
 loginRouter.post('/', async (request, response) => {
   const { username, password } = request.body
 
+  console.log('The Body:', request.body)
+
+  // Irgendwas stimmt hier nicht!!!
+
   const user = await User.findOne({ username })
   const passwordCorrect = user === null ? false : await bcrypt.compare(password, user.passwordHash)
 
@@ -22,7 +26,7 @@ loginRouter.post('/', async (request, response) => {
   }
 
   // Das ist der Token (jwt.sign erstellt einen Token und fügt auch userForToken Objekt und SECRET hinzu)
-  const token = jwt.sign(userForToken, process.env.SECRET, { expiresIn: 60*60 })
+  const token = jwt.sign(userForToken, process.env.SECRET)
 
   response
     .status(200)

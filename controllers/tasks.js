@@ -8,7 +8,8 @@ const User = require('../models/user')
 /** This file handles routing */
 
 const getTokenFrom = request => {
-  const authorizationHeader = request.get('Authorization')
+  const authorizationHeader = request.get('authorization')
+  console.log('authorizationHeader:', authorizationHeader)
   if (authorizationHeader && authorizationHeader.toLowerCase().startsWith('bearer ')) {
     return authorizationHeader.substring(7)
   }
@@ -19,13 +20,13 @@ tasksRouter.get('/', async (request, response) => {
   const tasks = await Task
     .find({})
     .populate('user', { username: 1, name: 1 })
-  
+
   response.json(tasks)
 })
 
 tasksRouter.get('/:id', async (request, response) => {
   const task = await Task.findById(request.params.id)
-  
+
   if (task) {
     response.json(task.toJSON())
   } else {
@@ -35,18 +36,20 @@ tasksRouter.get('/:id', async (request, response) => {
 
 tasksRouter.post('/', async (request, response) => {
   const { title, completed } = request.body
-  
+  console.log('Request-Body:', request.body)
   const token = getTokenFrom(request)
+  console.log('token:', token)
   const decodedToken = jwt.verify(token, process.env.SECRET)
-  
+  console.log('decodedToken:', decodedToken)
+
   if (!token || !decodedToken.id) {
     return response.status(401).json({ error: 'token missing or invalid' })
   }
   const user = await User.findById(decodedToken.id)
 
   const newTask = new Task({
-    title,
-    completed,
+    title: title,
+    completed: completed,
     date: new Date(),
     user: user._id
   })
